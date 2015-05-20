@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+
+{% load staticfiles %}
+
+<hmtl>
+    <head>
+        <title>About Page</title>
+        <link rel="stylesheet" href="{% static "css/base.css" %}"
+        <script src="{% static "js/jquery.js" %}"></script>
+    </head>
+
+    <body>
+        <p>Rango says this is the <b>{{ descriptor }}</b> page!</p>
+        <img src="{% static "images/about.jpg" alt="About Page Picture" %}" />
+    </body>
+
+</hmtl>
