@@ -123,3 +123,5 @@ PASSWORD_HASHERS = (
     #'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
     #'django.contrib.auth.hashers.CryptPasswordHasher'
 )
+
+LOGIN_URL = '/rango/login/'
