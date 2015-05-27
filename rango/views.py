@@ -37,7 +37,7 @@ def about(request):
 
 def category(request, category_name_slug):
     # Create a context dictional which we can pass to the template rendering engine.
-    context_dict = Context({})
+    context_dict = {}
 
     try:
         # Can we find a category name slug with the given name?
@@ -61,8 +61,11 @@ def category(request, category_name_slug):
         # Don't do anything - the template displays the "no category" message for us.
         pass
 
+    context = RequestContext(request, context_dict)
+    template = get_template('rango/category.html')
+    print(template.render(context))
     # Go render the response and return it to the client.
-    return render(request, 'rango/category.html', context_dict)
+    return render(request, 'rango/category.html', context)
 
 
 @login_required
@@ -96,7 +99,7 @@ def add_category(request):
     context = RequestContext(request, {'form': form})
     return render(request, 'rango/add_category.html', context)
 
-
+#TODO: Change the call to category to a redirect?
 @login_required
 def add_page(request, category_name_slug):
 
@@ -120,7 +123,7 @@ def add_page(request, category_name_slug):
     else:
         form = PageForm()
 
-    context = RequestContext(request, {'form': form, 'category': cat, })
+    context = RequestContext(request, {'form': form, 'category': cat})
 
     return render(request, 'rango/add_page.html', context)
 
