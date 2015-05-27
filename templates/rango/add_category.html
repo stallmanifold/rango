@@ -6,7 +6,7 @@
 
     <body>
         <h1>Add a Category</h1>
-
+        {% if user.is_authenticated %}
         <form id="category_form" method="post" action="{% url 'add_category' %}">
 
             {% csrf_token %}
@@ -22,6 +22,9 @@
 
             <input type="submit" name="submit" value="Create Category" />
         </form>
+        {% else %}
+        <p>You must be logged in to add a category.</p>
+        {% endif %}
     </body>
 
 </html>

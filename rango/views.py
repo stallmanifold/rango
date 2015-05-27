@@ -2,7 +2,7 @@ from django.shortcuts               import render
 from django.http                    import HttpResponse, HttpResponseRedirect
 from django.template.loader         import get_template
 from django.template                import Context, RequestContext
-from django.contrib.auth            import authenticate, login
+from django.contrib.auth            import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from rango.models                   import Category, Page
 from rango.forms                    import CategoryForm, PageForm
@@ -65,6 +65,7 @@ def category(request, category_name_slug):
     return render(request, 'rango/category.html', context_dict)
 
 
+@login_required
 def add_category(request):
     # A HTTP POST?
     if request.method == 'POST':
@@ -96,6 +97,7 @@ def add_category(request):
     return render(request, 'rango/add_category.html', context)
 
 
+@login_required
 def add_page(request, category_name_slug):
 
     try:
@@ -220,8 +222,19 @@ def user_login(request):
                 return HttpResponse("Your Rango account is disabled.")
         else:
             # Bad login details were provided. So we can't log the user in.
-            print "Invalid login details: {0}, {1}".format(username, password)
-            return HttpResponse("Invalid login details supplied.")
+            print("Invalid login details: {0}, {1}".format(username, password))
+            # Insert error message into response and put the response on the 
+            # login page populated with and error message.
+            context = RequestContext \
+                (
+                    request, 
+                    {
+                        'login_error': 'Invalid username or password.',
+                        'old_username': username,
+                    }
+                )
+            template = get_template('rango/login.html')
+            return HttpResponse(template.render(context))
 
     # The request is not a HTTP POST, so display the login form.
     # This scenario would most likely be a HTTP GET.

@@ -8,16 +8,27 @@
 
     <body>
         <h1>Login to Rango</h1>
-
+        {% if login_error %}
+        <p>{{ login_error }}</p>
         <form id="login_form" method="post" action="{% url 'login' %}">
             {% csrf_token %}
-            Username: <input type="text" name="username" value="" size="50" />
-            <br />
-            Password: <input type="password" name="password" value="" size="50" />
-            <br />
+            Username: 
+            <br /><input type="text" name="username" value="{{ old_username }}" size="50" /><br />
+            Password: 
+            <br /><input type="password" name="password" value="" size="50" /><br />
 
-            <input type="submit" value="submit" />
+            <input type="submit" value="Submit" />
         </form>
+        {% else %}
+        <form id="login_form" method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            Username: 
+            <br /><input type="text" name="username" value="" size="50" /><br />
+            Password: 
+            <br /><input type="password" name="password" value="" size="50" /><br />
 
+            <input type="submit" value="Submit" />
+        </form>
+        {% endif %}
     </body>
 </html>
