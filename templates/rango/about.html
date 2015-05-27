@@ -1,17 +1,10 @@
-<!DOCTYPE html>
+{% extends 'rango/base.html' %}
 
 {% load staticfiles %}
 
-<hmtl>
-    <head>
-        <title>About Page</title>
-        <link rel="stylesheet" href="{% static "css/base.css" %}"
-        <script src="{% static "js/jquery.js" %}"></script>
-    </head>
+{% block title %}About Page{% endblock %}
 
-    <body>
-        <p>Rango says this is the <b>{{ descriptor }}</b> page!</p>
-        <img src="{% static "images/about.jpg" alt="About Page Picture" %}" />
-    </body>
-
-</hmtl>
+{% block body_block %}
+    <p>Rango says this is the <b>{{ descriptor }}</b> page!</p>
+    <img src="{% static "images/about.jpg" alt="About Page Picture" %}" />
+{% endblock %}

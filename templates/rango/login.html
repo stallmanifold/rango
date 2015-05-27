@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <!-- Is anyone getting tired of repeatedly entering the header over and over?? -->
-        <!-- This sounds like a job for using template inheritance -->
-        <title>Rango</title>
-    </head>
+{% extends 'rango/base.html' %}
 
-    <body>
-        <h1>Login to Rango</h1>
-        {% if login_error %}
+{% block title %}
+    Login
+{% endblock %}
+
+{% block body_block %}
+    <h1>Login to Rango</h1>
+    {% if login_error %}
         <p>{{ login_error }}</p>
         <form id="login_form" method="post" action="{% url 'login' %}">
             {% csrf_token %}
@@ -19,7 +17,7 @@
 
             <input type="submit" value="Submit" />
         </form>
-        {% else %}
+    {% else %}
         <form id="login_form" method="post" action="{% url 'login' %}">
             {% csrf_token %}
             Username: 
@@ -29,6 +27,5 @@
 
             <input type="submit" value="Submit" />
         </form>
-        {% endif %}
-    </body>
-</html>
+    {% endif %}
+{% endblock %}
