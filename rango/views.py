@@ -19,20 +19,18 @@ def index(request):
     page_list = Page.objects.order_by('-views')[:5]
     context_dict = {'categories': category_list, 'pages': page_list}
 
-    # Get the number of visits to the site.
-    # We use the COOKIES.get() function to obtain the visits cookie.
-    # If the cookie exists, the value returned is casted to an integer.
-    # If the cookie doesn't, exist, we default to zero and cast that.
-    visits = int(request.COOKIES.get('visits', '1'))
+    visits = request.session.get('visits')
+    if not visits:
+        visits = 1
     reset_last_visit_time = False
 
+    last_visit = request.session.get('last_visit')
     # Does the cookie last_visit exist?
-    if 'last_visit' in request.COOKIES:
-        last_visit = request.COOKIES['last_visit']
+    if last_visit is not None:
         last_visit_time = datetime.strptime(last_visit[:-7], "%Y-%m-%d %H:%M:%S")
 
         # If it has been more than a day since the last visit
-        if (datetime.now() - last_visit_time).days > 0:
+        if (datetime.now() - last_visit_time).seconds > 0:
             visits += 1
             # ... and flag that the cookie last visit needs to be updated
             reset_last_visit_time = True
@@ -40,21 +38,49 @@ def index(request):
         # Cookie last_visit doesn't exist, so flag that it should be set.
         reset_last_visit_time = True
 
+    # Append the new cookie information if we visited previously.
+    if reset_last_visit_time:
+        request.session['last_visit'] = str(datetime.now())
+        request.session['visits'] = visits
+    
     context_dict['visits'] = visits
     context = RequestContext(request, context_dict)
     template = get_template('rango/index.html')
     response = HttpResponse(template.render(context))
-    # Append the new cookie information if we visited previously.
-    if reset_last_visit_time:
-        response.set_cookie('last_visit', datetime.now())
-        response.set_cookie('visits', visits)
-
+    
     return response
 
 
 def about(request):
-    context = Context({'descriptor': "ABOUT"})
+    context_dict = {'descriptor': 'ABOUT'}
+    if request.session.has_key('visits'):
+        visits = request.session.get('visits')
+    else:
+        visits = 1
+
+    last_visit = request.session.get('last_visit')
+    # Does the cookie last_visit exist?
+    if last_visit:
+        last_visit_time = datetime.strptime(last_visit[:-7], "%Y-%m-%d %H:%M:%S")
+
+        # If it has been more than a day since the last visit
+        if (datetime.now() - last_visit_time).seconds > 0:
+            visits += 1
+            # ... and flag that the cookie last visit needs to be updated
+            reset_last_visit_time = True
+    else:
+        # Cookie last_visit doesn't exist, so flag that it should be set.
+        reset_last_visit_time = True
+
+    # Append the new cookie information if we visited previously.
+    if reset_last_visit_time:
+        request.session['last_visit'] = str(datetime.now())
+        request.session['visits'] = visits
+
+    context_dict['visits'] = visits
+    context = RequestContext(request, context_dict)
     template = get_template('rango/about.html')
+
     return HttpResponse(template.render(context))
 
 
