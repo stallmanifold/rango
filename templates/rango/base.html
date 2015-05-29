@@ -25,6 +25,9 @@
                 <li><a href="{% url 'index' %}">Index</a></li>
                 <li><a href="{% url 'about' %}">About</a></li>
             </ul>
+            {% if visits %}
+                <p>Visits: {{ visits }}</p>
+            {% endif %}
         </div>
     </body>
 </html>
