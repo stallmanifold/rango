@@ -58,3 +58,21 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ('website', 'picture')
+
+
+class PasswordChangeForm(forms.Form):
+    username = forms.CharField(widget=forms.TextInput(attrs={'type': 'text'}))
+    old_password = forms.CharField(widget=forms.PasswordInput(attrs={}))
+    new_password = forms.CharField(widget=forms.PasswordInput(attrs={}))
+    new_password_confirmation = forms.CharField(label='Confirm New Password',
+        widget=forms.PasswordInput(attrs={}))
+
+    def is_valid(self):
+        password = self['new_password'].value()
+        password_confirmation = self['new_password_confirmation'].value()
+
+        if password == password_confirmation:
+            return super(forms.Form, self).is_valid()
+        else:
+            self.add_error('new_password', 'Passwords do not match. Please enter the same password in both fields.')
+            return False

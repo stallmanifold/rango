@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from rango.models                   import Category, Page
 from rango.forms                    import CategoryForm, PageForm
 from rango.forms                    import UserForm, UserProfileForm
+from rango.forms                    import PasswordChangeForm
 
 
 def index(request):
@@ -147,6 +148,7 @@ def add_category(request):
     # the csrf cookie as being not set.
     context = RequestContext(request, {'form': form})
     return render(request, 'rango/add_category.html', context)
+
 
 #TODO: Change the call to category to a redirect?
 @login_required
@@ -309,3 +311,56 @@ def user_logout(request):
     # Take the user back to the homepage.
     return HttpResponseRedirect('/rango/')
 
+
+#TODO: Refactor this function to take the password vierification logic out of the view.
+@login_required
+def change_password(request):
+
+    def prepare_form(form):
+        new_form = PasswordChangeForm({'username': form['username'].value()})
+        for field, error_list in form.errors.items():
+            for error in error_list:
+                new_form.add_error(field, error)
+
+        return new_form
+
+
+    if request.method == 'POST':
+        password_change_form = PasswordChangeForm(request.POST)
+
+        if password_change_form.is_valid():
+            username = password_change_form['username'].value()
+            password = password_change_form['old_password'].value()
+            user = authenticate(username=username, password=password)
+            # User has been authenticated, so it is safe to change the password.
+            if user:
+                new_password = password_change_form['new_password'].value()
+                user.set_password(new_password)
+                user.save()
+                # Redirect to password change complete page.
+                template = get_template('rango/password_change_complete.html')
+                context = RequestContext(request, {})
+                return HttpResponseRedirect('password_change_complete')
+            # User entered the wrong password, or needs to register.
+            else:
+                print(password_change_form.errors)
+                password_change_form = prepare_form(password_change_form)
+        # Return the password change form displaying errors.
+        else:
+            print(password_change_form.errors)
+            password_change_form = prepare_form(password_change_form)
+    # The request method is not POST, so return the password form.
+    else:
+        password_change_form = PasswordChangeForm()
+        
+    template = get_template('rango/password_change_form.html')
+    context = RequestContext(request, {'password_change_form': password_change_form})
+    return HttpResponse(template.render(context))
+
+
+def password_change_complete(request):
+    context = RequestContext(request, {})
+    template = get_template('rango/password_change_complete.html')
+    response = HttpResponse(template.render(context))
+
+    return response
