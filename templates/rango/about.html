@@ -5,6 +5,13 @@
 {% block title %}About Page{% endblock %}
 
 {% block body_block %}
-    <p>Rango says this is the <b>{{ descriptor }}</b> page!</p>
-    <img src="{% static "images/about.jpg" alt="About Page Picture" %}" />
+    <div class="page-header">
+        <h1>About</h1>
+    </div>
+    <div>
+        <p>This is <strong>Rango's <b>{{ descriptor }}</b> page!</strong></p>
+        <p>You have visited the site on <strong>{{ visits }} occasion(s).</strong>
+        <p>Here is a picture of Rango!</p>
+        <img src="{% static "images/about.jpg" alt="About Page Picture" %}" />
+    </div>
 {% endblock %}

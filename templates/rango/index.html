@@ -3,33 +3,58 @@
 {% block title %}Front Page{% endblock %}
 
 {% block body_block %}
-    {% if user.is_authenticated %}
-        <h1>Rango says... Hello {{ user.username }}</h1>
-    {% else %}
-        <h1>Rango Says... Hello World!</h1>
-    {% endif %}
-
-    {% if categories %}
-        <p>Here are the top 5 categories</p>
-        <ul>
-            {# Here we add the top number of categories. #}
-            {% for category in categories %}
-            <li><a href="{% url 'category' category.slug %}">{{ category.name }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <strong>There are no categories present.</strong>
-    {% endif %}
-
-    {% if pages %}
-        <p>Here are the top 5 pages</p>
-        <ul>
-            {# Here we add the top number of pages. #}
-            {% for page in pages %}
-                <li><a href="{{ page.url }}">{{ page.title }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <strong>There are no pages present.</strong>
-    {% endif %}
+    <div class="page-header">
+        {% if user.is_authenticated %}
+            <h1>Rango says... Hello {{ user.username }}</h1>
+        {% else %}
+            <h1>Rango Says... Hello World!</h1>
+        {% endif %}
+    </div>
+    
+    <div class="row placeholders">
+        <div class="col-xs-12 col-sm-6 placeholder">
+            {% if categories %}
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Top {{ pages|length }} Categories</h3>
+                    </div>
+                </div>
+                
+                <div>
+                    <ul class="list-group">
+                        {# Here we add the top number of categories. #}
+                        {% for category in categories %}
+                            <li class="list-group-item">
+                                <a href="{% url 'category' category.slug %}">{{ category.name }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                <strong>There are no categories present.</strong>
+            {% endif %}
+        </div>
+        <div class="col-xs-12 col-sm-6 placeholder">
+            {% if pages %}
+                <div class="panel panel-primary">
+                    <div class="panel-heading">  
+                        <h3 class="panel-title">Top {{ pages|length }} Pages</h3>
+                    </div>
+                </div>
+                
+                <div>
+                    <ul class="list-group">
+                        {# Here we add the top number of pages. #}
+                        {% for page in pages %}
+                            <li class="list-group-item">
+                                <a href="{{ page.url }}">{{ page.title }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                <strong>There are no pages present.</strong>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
