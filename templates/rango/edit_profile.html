@@ -1,0 +1,42 @@
+{% extends 'rango/base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}
+    Edit Profile
+{% endblock %}
+
+{% block body_block %}
+    {% if user.is_authenticated %}
+        <div class="page-header">
+            <h1>{{ username|capfirst }}'s Profile</h1>
+        </div>
+        <div class="form-group">
+            <form role="form" method="post" action="{% url 'edit_profile' %}"
+                enctype="multipart/form-data">
+                
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_website">Website:</label>
+                    <input class="form-control" id="id_website" maxlength="200"
+                        name="website" type="url" placeholder="Website" 
+                        value="{{ website }}">
+                </div>
+
+                <div class="">
+                    <label for="id_picture">Picture:</label>
+                    <input class="btn btn-default" id="id_picture" name="picture" 
+                        type="file" placeholder="Upload Image" 
+                        value="{% static '{{ picture }}' %}">
+
+                </div>
+                <div class="">
+                    <img src="{% static picture_url %}" alt="Profile Picture">
+                </div>
+                <input class="btn btn-primary" type="submit" value="Submit">
+            </form>
+        </div>
+    {% else %}
+        <p>You must be logged in to edit your profile.</p>
+    {% endif %}
+{% endblock %}

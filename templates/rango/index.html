@@ -3,6 +3,7 @@
 {% block title %}Front Page{% endblock %}
 
 {% block body_block %}
+<div class="jumbotron">
     <div class="page-header">
         {% if user.is_authenticated %}
             <h1>Rango says... Hello {{ user.username }}</h1>
@@ -57,4 +58,5 @@
             {% endif %}
         </div>
     </div>
+</div>
 {% endblock %}

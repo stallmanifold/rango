@@ -2,7 +2,7 @@ from django.db                      import models
 from django.template.defaultfilters import slugify
 from django.contrib.auth.models     import User
 
-# Create your models here.
+
 class Category(models.Model):
     name  = models.CharField(max_length=128, unique=True)
     views = models.IntegerField(default=0)
@@ -58,8 +58,11 @@ class UserProfile(models.Model):
 
     # Override the __str__ method to return something meaningful!
     def __str__(self):
-        return self.user.username
+        return repr(self)
 
     def __repr__(self):
-        return "<UserProfile(username={})>".format(self.user.username)
-        
+        return "<UserProfile(username={}, website={}, picture={})>".format(
+                self.user.username, 
+                self.website,
+                self.picture,
+            )

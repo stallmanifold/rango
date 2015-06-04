@@ -1,0 +1,14 @@
+{% extends 'rango/base.html' %}
+
+{% block title %}
+    Profile Changes Successful
+{% endblock %}
+
+{% block body_block %}
+        <p>Profile changes were successfully made!</p>
+        <a href="{% url 'profile' %}" class="btn btn-lg btn-primary btn-block" 
+            type="submit" name="submit">
+
+            Return To Profile
+        </a>
+{% endblock %}

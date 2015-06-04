@@ -2,8 +2,6 @@ from django                     import forms
 from rango.models               import Page, Category, UserProfile
 from django.contrib.auth.models import User
 
-import registration.forms
-
 
 class CategoryForm(forms.ModelForm):
     name  = forms.CharField(max_length=128, help_text="Please enter the category name.")
@@ -78,7 +76,3 @@ class PasswordChangeForm(forms.Form):
         else:
             self.add_error('new_password', 'Passwords do not match. Please enter the same password in both fields.')
             return False
-
-
-class RegistrationForm(registration.forms.RegistrationForm):
-    pass

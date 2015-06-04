@@ -14,7 +14,16 @@
         {% if pages %}
             <ul class="list-group">
                 {% for page in pages %}
-                <li class="list-group-item"><a href="{{ page.url }}">{{ page.title }}</a></li>
+                    <li class="list-group-item">
+                        <a href="{% url 'goto' page.id %}">{{ page.title }}</a>
+                        <span class="badge">
+                            {% if page.views > 1 %}
+                                {{ page.views }} views
+                            {% elif page.views == 1 %}
+                                {{ page.views }} view
+                            {% endif %}
+                        </span>
+                    </li>
                 {% endfor %}
             </ul>
         {% else %}
@@ -22,9 +31,15 @@
         {% endif %}
 
         {% if user.is_authenticated %}
-            <a href="{% url 'add_page' category.slug %}">Add a new page</a>
+            <a href="{% url 'add_page' category.slug %}" class="btn btn-primary" type="submit" 
+                name="submit">
+                    Add a new page
+            </a>
         {% else %}
-            <p>To add a new page, you must <a href="{% url 'auth_login' %}">log in</a>!</p>
+            <a href="{% url 'auth_login' %}" class="btn btn-primary" type="submit" 
+                name="submit">
+                    Log in to add a new page
+            </a>
         {% endif %}
     {% else %}
         The specified category {{ category_name }} does not exist!

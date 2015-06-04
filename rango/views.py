@@ -1,14 +1,15 @@
 from datetime                       import datetime
-from django.shortcuts               import render
+from django.shortcuts               import render, redirect
 from django.http                    import HttpResponse, HttpResponseRedirect
 from django.template.loader         import get_template
 from django.template                import Context, RequestContext
 from django.contrib.auth            import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from rango.models                   import Category, Page
+from rango.models                   import Category, Page, UserProfile, User
 from rango.forms                    import CategoryForm, PageForm
 from rango.forms                    import UserForm, UserProfileForm
 from rango.forms                    import PasswordChangeForm
+from rango.bing_search              import run_query
 
 
 def index(request):
@@ -98,7 +99,7 @@ def category(request, category_name_slug):
 
         # Retrieve all of the associated pages.
         # Note the filters returns >= 1 model instances.
-        pages = Page.objects.filter(category=category)
+        pages = Page.objects.filter(category=category).order_by('-views')
 
         # Adds our result list to the template context under name pages.
         context_dict['pages'] = pages
@@ -364,3 +365,128 @@ def password_change_complete(request):
     response = HttpResponse(template.render(context))
 
     return response
+
+
+def track_url(request, page_id):
+    page = None
+    url = 'index'
+    if request.method== 'GET':
+        try:
+            page = Page.objects.get(id=page_id)
+        except Page.DoesNotExist:
+            page = None
+
+        if page:
+            page.views += 1
+            page.save()
+            url = page.url
+        else:
+            return redirect('index')
+
+    return redirect(url)
+
+
+def registration_complete(request):
+    context = RequestContext(request, {})
+    template = get_template('registration/registration_complete.html')
+    response = HttpResponse(template.render(context))
+
+    return response
+
+
+@login_required
+def profile(request):
+    if request.method == 'GET':
+        user = request.user
+        try:
+            user_profile = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            user_profile = UserProfile()
+    else:
+        user = request.user
+        user_profile = UserProfile()
+    
+    context_dict = \
+        {
+            'user_profile': user_profile, 
+            'username': user.username,
+            'website': user_profile.website,
+            'picture_url': user_profile.picture.url,
+        }
+
+    context = RequestContext(request, context_dict)
+    template = get_template('rango/profile.html')
+    print(context['picture_url'])
+    return HttpResponse(template.render(context))
+
+
+@login_required
+def edit_profile(request):
+    # Grab the user's information from the database, if it exists.
+    try:
+        user = User.objects.get(username=request.user.username)
+    except User.DoesNotExist:
+        user = User() 
+
+    try:
+        profile = UserProfile.objects.get(user=user)
+    except UserProfile.DoesNotExist:
+        profile = UserProfile(user=user)
+
+    # Profile Update submission.
+    if request.method == 'POST':
+        # Grab the user's information from the database.
+
+        form = UserProfileForm(data=request.POST, instance=profile)
+        if user and form.is_valid():
+            # Update the user's profile.
+            # form.save(commit=True)
+            profile = form.save(commit=False)
+            profile.picture = request.FILES.get('picture')
+            profile.save()
+            # Prepare the return response
+            response = redirect('profile_edit_complete')
+        else:
+            # User does not exist in database. We will redirect the user
+            # to the registration page.
+            response = redirect('registration_register')
+    # Visiting the profile page.
+    else:
+        # Get user profile data and populate the form.
+        form = UserProfileForm(instance=profile)
+        print(form)
+
+        context_dict = \
+            {
+                'username': user.username, 
+                'user': user, 
+                'website': profile.website, 
+                'picture_url': profile.picture.url,
+                'user_profile_form': form,
+            }
+        context = RequestContext(request, context_dict)
+        response = render(request, 'rango/edit_profile.html', context)
+
+    return response
+
+
+def profile_edit_complete(request):
+    context = RequestContext(request, {})
+    template = get_template('rango/profile_edit_complete.html')
+    response = HttpResponse(template.render(context))
+
+    return response
+
+
+def search(request):
+
+    result_list = []
+
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+
+        if query:
+            # Run our Bing function to get the results list!
+            result_list = run_query(query)
+
+    return render(request, 'rango/search.html', {'result_list': result_list})

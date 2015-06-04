@@ -1,0 +1,42 @@
+{% extends 'rango/base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block body_block %}
+    {% if user.is_authenticated %}
+
+        <div class="page-header">
+            <h1>
+                {% if username %}
+                    {{ username|capfirst }}'s Profile
+                {% else %}
+                    Profile
+                {% endif %}
+            </h1>
+        </div>
+
+        <div class="nav">
+            <a href="{% url 'edit_profile' %}" class="btn btn-primary" role="button" 
+                type="submit" name="submit">
+                    Edit Profile
+            </a>
+        </div>
+        <div class="nav">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <strong>Website:</strong>
+                    <a href={{ website }}>{{ website }}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="nav">
+            <img src="{% static picture_url %}" alt="Profile Picture">
+        </div>
+    {% else %}
+        <p>You need to be logged in to view your profile.</p>
+    {% endif %}
+{% endblock %}
