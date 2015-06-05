@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^rango/category/(?P<category_name_slug>[\w\-]+)/$', views.category, name='category'),
     url(r'^add_category/$', views.add_category, name='add_category'),
     url(r'^category/(?P<category_name_slug>[\w\-]+)/add_page/$', views.add_page, name='add_page'),
+    url(r'^like_category/(?P<category_id>[\w\-]+)/$', views.like_category, name="like_category"),
     url(r'^restricted/$', views.restricted, name='restricted'),
     url(r'^change_password/$', views.change_password, name='change_password'),
     url(r'^change_password/password_change_complete/$', views.password_change_complete, 

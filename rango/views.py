@@ -5,6 +5,7 @@ from django.template.loader         import get_template
 from django.template                import Context, RequestContext
 from django.contrib.auth            import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.db.models.query         import QuerySet
 from rango.models                   import Category, Page, UserProfile, User
 from rango.forms                    import CategoryForm, PageForm
 from rango.forms                    import UserForm, UserProfileForm
@@ -98,23 +99,32 @@ def category(request, category_name_slug):
         context_dict['category_name'] = category.name
 
         # Retrieve all of the associated pages.
-        # Note the filters returns >= 1 model instances.
-        pages = Page.objects.filter(category=category).order_by('-views')
+        pages = list(Page.objects.filter(category=category).order_by('-views'))
 
         # Adds our result list to the template context under name pages.
         context_dict['pages'] = pages
         # We also add the category object from the database to the context dictionary.
         # We'll use this in the template to verify that the category exists.
-        context_dict['category']= category
+        context_dict['category'] = category
         context_dict['category_name_slug'] = category.slug
     except Category.DoesNotExist:
         # We get here if we didn't find the specified category.
         # Don't do anything - the template displays the "no category" message for us.
         pass
 
-    context = RequestContext(request, context_dict)
-    template = get_template('rango/category.html')
-    print(template.render(context))
+    if request.method == 'POST':
+        # We don't have to use bing if we don't want to.
+        query = request.POST.get('query', '')
+        if query != '':
+            pages = context_dict.get('pages', [])
+            # search_results = list(run_query(query))
+            search_results = list(filter(lambda page: query in page.title, pages))
+            context_dict['pages'] = search_results  
+
+        context = RequestContext(request, context_dict)
+    # Treat request as a 'GET'    
+    else:
+        context = RequestContext(request, context_dict)
 
     return render(request, 'rango/category.html', context)
 
@@ -151,7 +161,27 @@ def add_category(request):
     return render(request, 'rango/add_category.html', context)
 
 
-#TODO: Change the call to category to a redirect?
+@login_required
+def like_category(request, category_id):
+    
+    try:
+        category = Category.objects.get(id=category_id)
+    except Category.DoesNotExist:
+        category = None
+
+    if request.method == 'GET':
+        if category:
+            #Update the number of likes for category
+            category.likes += 1
+            category.save()
+            likes = category.likes
+        else:
+            # Category does not exist.
+            likes = 0
+
+        return HttpResponse("{} likes".format(likes))    
+
+
 @login_required
 def add_page(request, category_name_slug):
 
@@ -490,3 +520,30 @@ def search(request):
             result_list = run_query(query)
 
     return render(request, 'rango/search.html', {'result_list': result_list})
+
+
+def get_category_list(max_results=0, starts_with=''):
+        cat_list = []
+        if starts_with:
+            cat_list = Category.objects.filter(name__istartswith=starts_with)
+
+        if max_results > 0:
+            if len(cat_list) > max_results:
+                cat_list = cat_list[:max_results]
+
+        return cat_list
+
+
+def suggest_category(request, max_results=8):
+
+        cat_list = []
+        starts_with = ''
+        if request.method == 'GET':
+            starts_with = request.GET['suggestion']
+
+        cat_list = get_category_list(max_results, starts_with)
+        context = RequestContext(request, {'cat_list': cat_list })
+
+        return render(request, 'rango/category_list.html', context)
+
+

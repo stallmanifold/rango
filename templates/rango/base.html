@@ -48,7 +48,7 @@
                     <li><a href="{% url 'auth_login' %}">Login</a></li>
                 {% endif %}
                     <li><a href="{% url 'about' %}">About</a></li>
-                    <li><a href="{% url 'search' %}">Search</a></li>
+                    {# <li><a href="{% url 'search' %}">Search</a></li> #}
             </ul>
         </div>
       </div>
@@ -58,7 +58,18 @@
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
             {% block side_block %}
-              {% get_category_list category %}
+                <ul class="nav nav-list">
+                    <li class="nav-header">Find a Category</li>
+                    <form>
+                        <label></label>
+                        <li><input  class="search-query span10" type="text" name="suggestion" 
+                            value="" id="suggestion" /></li>
+                    </form>
+                </ul>
+
+                <div id="cats">
+                </div>
+                {% get_category_list category %}
             {% endblock %}
 
         </div>
@@ -70,6 +81,7 @@
       </div>
     </div>
 
+    {% load staticfiles %}
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -77,5 +89,10 @@
     <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js"></script>
+    <!-- jQuery -->
+    <script src="{% static "javascripts/jquery-2.1.4.min.js" %}"></script>
+    <script src="{% static "javascripts/rango-ajax.js" %}"></script>
+    <script src="{% static "javascripts/rango-jquery.js" %}"></script>
   </body>
+
 </html>
