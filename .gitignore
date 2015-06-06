@@ -7,3 +7,4 @@ manage.py
 media/**
 tango_with_django_project/keys.py
 keys.py
+*.coverage

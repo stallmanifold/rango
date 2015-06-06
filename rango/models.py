@@ -4,6 +4,7 @@ from django.contrib.auth.models     import User
 
 
 class Category(models.Model):
+    
     name  = models.CharField(max_length=128, unique=True)
     views = models.IntegerField(default=0)
     likes = models.IntegerField(default=0)
@@ -12,12 +13,20 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = "Categories"
 
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
+        if (self.views < 0):
+            self.views = 0
+        if (self.likes < 0):
+            self.likes = 0
+
         super(Category, self).save(*args, **kwargs)
+
 
     def __str__(self):
         return self.name
+
 
     def __repr__(self):
         return "<Category(name={}, views={}, likes={}, slug={})>".format \
@@ -30,13 +39,16 @@ class Category(models.Model):
 
 
 class Page(models.Model):
+    
     category = models.ForeignKey(Category)
     title    = models.CharField(max_length=128)
     url      = models.URLField()
     views    = models.IntegerField(default=0)
 
+
     def __str__(self):
         return self.title
+
 
     def __repr__(self):
         return "<Page(category={}, title={}, url={}, views={})>".format \
@@ -49,6 +61,7 @@ class Page(models.Model):
 
 
 class UserProfile(models.Model):
+    
     # This line is requires. Links UserProfile to User model.
     user = models.OneToOneField(User)
 
@@ -56,10 +69,12 @@ class UserProfile(models.Model):
     website = models.URLField(blank=True)
     picture = models.ImageField(upload_to='profile_images', blank=True)
 
+    
     # Override the __str__ method to return something meaningful!
     def __str__(self):
         return repr(self)
 
+    
     def __repr__(self):
         return "<UserProfile(username={}, website={}, picture={})>".format(
                 self.user.username, 
