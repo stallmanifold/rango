@@ -1,7 +1,9 @@
 from django.test              import TestCase
 from django.core.urlresolvers import reverse
+from django.db.utils          import IntegrityError
+from django.db                import transaction
 
-from rango.models             import Category
+from rango.models             import Category, Page
 
 
 def add_category(name, views, likes):
@@ -57,13 +59,54 @@ class CategoryMethodsTests(TestCase):
         self.assertEqual(Category.objects.filter(pk=category.pk).exists(), True)
 
 
+    def test_empty_category_should_have_blank_name_and_blank_slug(self):
+
+        category = Category()
+        category.save()
+        self.assertEqual(category.name, '')
+        self.assertEqual(category.slug, '')
+
+
+    def test_category_names_should_be_unique(self):
+        
+        category1 = Category(name='test', views=1, likes=1)
+        category2 = Category(name='test', views=2, likes=2)
+        category1.save()
+        with self.assertRaises(IntegrityError):
+            category2.save()
+
+
+    def test_category_slug_should_be_unique(self):
+        
+        category1 = Category(name='test1', views=1, likes=1)
+        category2 = Category(name='test1', views=2, likes=2)
+        category3 = Category(name='test2', views=3, likes=3)
+        category1.save()
+        
+        try:
+            with transaction.atomic():
+                category2.save()
+        except IntegrityError as ie:
+            self.assertEqual(category1.slug, category2.slug)
+        else:
+            self.fail()
+
+        try:
+            with transaction.atomic():
+                category3.save()
+        except IntegrityError as ie:
+            self.fail()
+        
+        self.assertNotEqual(category1.slug, category3.slug)
+
+
 class IndexViewTests(TestCase):
 
     def test_index_view_with_no_categories(self):
         """
         If no questions exist, an appropriate message should be displayed.
         """
-        
+
         response = self.client.get(reverse('index'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "There are no categories present.")
@@ -88,3 +131,65 @@ class IndexViewTests(TestCase):
         self.assertEqual(num_cats , 4)
 
 
+class PageMethodsTests(TestCase):
+
+    def test_page_contains(self):
+        """
+        test_category_contains tests whether the save() function is working correctly.
+        """
+
+        category = Category()
+        category.save()
+        page = Page(category=category, title='test page', views=21)
+        page.save()
+        self.assertEqual(Page.objects.filter(pk=page.pk).exists(), True)
+
+
+    def test_page_views_should_be_nonnegative(self):
+
+        category = Category()
+        category.save()
+        page = Page(category=category, title='test page', views=-100)
+        page.save()
+        self.assertTrue(page.views >= 0)
+
+
+class AboutViewTests(TestCase):
+
+    def test_about_view_exists(self):
+        """
+        The about page's URL should exists with the specified name in
+        the url configuration.
+        """
+
+        response = self.client.get(reverse('about'))
+        self.assertNotEqual(response.status_code, 404)
+
+
+    def test_about_view_should_contain_visit_amount(self):
+        """
+        The about page should contain the number of visits that a user visited
+        the about page in its response.
+        """
+
+        response = self.client.get(reverse('about'))
+        self.assertEqual(response.status_code, 200)
+        visits = response.context['visits']
+        self.assertIsNotNone(visits)
+        self.assertTrue(visits > 0)
+
+
+    def test_about_view_should_contain_descriptor(self):
+        """
+        The about page should contain the a descriptor for the website in the about
+        page response.
+        """
+
+        response = self.client.get(reverse('about'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['descriptor'], 'ABOUT')
+
+
+class CategoryViewTests(TestCase):
+
+    pass
