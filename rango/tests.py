@@ -1,5 +1,6 @@
 from django.test              import TestCase
 from django.core.urlresolvers import reverse
+from django.core.urlresolvers import NoReverseMatch
 from django.db.utils          import IntegrityError
 from django.db                import transaction
 
@@ -91,11 +92,13 @@ class CategoryMethodsTests(TestCase):
         else:
             self.fail()
 
+        # Saving two different database entries in succession should not
+        # raise an error.
         try:
             with transaction.atomic():
                 category3.save()
         except IntegrityError as ie:
-            self.fail()
+            self.fail(ie)
         
         self.assertNotEqual(category1.slug, category3.slug)
 
@@ -192,4 +195,45 @@ class AboutViewTests(TestCase):
 
 class CategoryViewTests(TestCase):
 
-    pass
+    def test_category_that_does_not_exist(self):
+        """
+        Test that rango responds correctly when the user tries to 
+        go to a category that does not exist.
+        """
+
+        # We don't want to save the category because we are interested in 
+        # what the view does with a nonexistent category.
+        category = Category(name='non_existent_test_category')
+        category.slug = category.name
+        # If the URL resolver throws an exception, just fail fast.
+        try:
+            response = self.client.get(reverse('category', args=(category.slug,)))
+        except NoReverseMatch as nrm:
+            self.fail(msg="The category slug that caused failure is: {}\n \
+                {}".format(category.slug, nrm))
+        # We should get a HTTP 200 on a non-existent category.
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Category Does Not Exist")
+        self.assertContains(response, 
+            "The specified category <strong>{}</strong> does not exist!".format(category.slug))
+
+
+    def test_category_with_empty_name_should_display_does_not_exist_page(self):
+        """
+        This test tests how rango reacts to trying to render a category with an empty name.
+        """
+
+        category = Category(name='')
+        category.slug=category.name
+        try:
+            response = self.client.get(reverse('category', args=(category.slug,)))
+        except NoReverseMatch as nrm:
+            self.fail(msg="The category slug that caused failure is: {}\n \
+                {}".format(category.slug, nrm))
+        # We should get a HTTP 200 on a non-existent category.
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Category Does Not Exist")
+        self.assertEqual('', category.slug)
+
+
+

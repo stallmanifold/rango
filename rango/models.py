@@ -9,6 +9,7 @@ class Category(models.Model):
     views = models.IntegerField(default=0)
     likes = models.IntegerField(default=0)
     slug  = models.SlugField(unique=True)
+    
 
     class Meta:
         verbose_name_plural = "Categories"

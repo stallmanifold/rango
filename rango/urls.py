@@ -7,11 +7,11 @@ from rango                   import views
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^about/', views.about, name='about'),
-    url(r'^category/(?P<category_name_slug>[\w\-]+)/$', views.category, name='category'),
-    url(r'^rango/category/(?P<category_name_slug>[\w\-]+)/$', views.category, name='category'),
+    url(r'^category/(?P<category_name_slug>[\w\-]*)/$', views.category, name='category'),
+    url(r'^rango/category/(?P<category_name_slug>[\w\-]*)/$', views.category, name='category'),
     url(r'^add_category/$', views.add_category, name='add_category'),
     url(r'^category/(?P<category_name_slug>[\w\-]+)/add_page/$', views.add_page, name='add_page'),
-    url(r'^like_category/(?P<category_id>[\w\-]+)/$', views.like_category, name="like_category"),
+    url(r'^like_category/(?P<category_id>[0-9]+)/$', views.like_category, name="like_category"),
     url(r'^restricted/$', views.restricted, name='restricted'),
     url(r'^change_password/$', views.change_password, name='change_password'),
     url(r'^change_password/password_change_complete/$', views.password_change_complete, 
@@ -24,6 +24,8 @@ urlpatterns = [
     url(r'^profile/edit_profile/profile_edit_complete/$', views.profile_edit_complete, 
         name='profile_edit_complete'),
     url(r'^search/$', views.search, name='search'),
+    url(r'^suggest_category/$', views.suggest_category, name='suggest_category'),
+    
 ]
 
 # Do not use this for production!
@@ -35,6 +37,3 @@ if settings.DEBUG:
             'document_root': settings.MEDIA_ROOT,
         }),
     ]
-
-    # Do not use this for production!
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

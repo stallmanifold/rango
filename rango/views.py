@@ -10,7 +10,7 @@ from rango.models                   import Category, Page, UserProfile, User
 from rango.forms                    import CategoryForm, PageForm
 from rango.forms                    import UserForm, UserProfileForm
 from rango.forms                    import PasswordChangeForm
-from rango.bing_search              import run_query
+
 
 
 def index(request):
@@ -110,7 +110,8 @@ def category(request, category_name_slug):
     except Category.DoesNotExist:
         # We get here if we didn't find the specified category.
         # Don't do anything - the template displays the "no category" message for us.
-        pass
+        print(category_name_slug)
+        context_dict['category_name_slug'] = category_name_slug
 
     if request.method == 'POST':
         # We don't have to use bing if we don't want to.
