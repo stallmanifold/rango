@@ -236,4 +236,17 @@ class CategoryViewTests(TestCase):
         self.assertEqual('', category.slug)
 
 
+    def test_category_with_no_pages(self):
+        """
+        This test checks that rango displays the correct message
+        when no pages are present in a category with no pages.
+        """
 
+        category = Category(name='test')
+        category.save()
+
+        response = self.client.get(reverse('category', args=(category.slug,)))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No pages currently in category.")
+        

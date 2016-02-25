@@ -12,7 +12,6 @@ from rango.forms                    import UserForm, UserProfileForm
 from rango.forms                    import PasswordChangeForm
 
 
-
 def index(request):
     # Query the database for a list of ALL categories currently stored.
     # Order the categories by no. likes in descending order.
